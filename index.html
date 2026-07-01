@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La linea che non arriva — Inchiesta sulla metro di superficie di Cagliari</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#E7EBEE;         /* cool printed-map paper */
+  --paper-2:#DCE2E7;
+  --card:#F5F7F9;
+  --ink:#132038;           /* signage navy */
+  --ink-soft:#3E4B63;
+  --hair:#B9C3CC;
+  --line:#1957C7;          /* the metro line colour */
+  --go:#1F8A57;            /* signal: done / open */
+  --slow:#D69022;          /* signal: in progress / delay */
+  --stop:#C23B25;          /* signal: blocked / alert */
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --disp:'Archivo',var(--sans);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;padding-bottom:62px;
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+.wrap{max-width:960px;margin:0 auto;padding:0 22px}
+h1,h2,h3{font-family:var(--disp);font-weight:900;line-height:1.02;letter-spacing:-.02em}
+.mono{font-family:var(--mono)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--line)}
+
+/* ---------- top nav ---------- */
+nav.top{position:sticky;top:0;z-index:40;background:rgba(231,235,238,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--hair)}
+nav.top .wrap{display:flex;align-items:center;gap:6px;height:52px;overflow-x:auto}
+nav.top .brand{font-family:var(--disp);font-weight:900;font-size:15px;letter-spacing:-.01em;
+  margin-right:auto;white-space:nowrap;display:flex;align-items:center;gap:8px}
+nav.top .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--stop);
+  box-shadow:0 0 0 3px rgba(194,59,37,.18)}
+nav.top a{font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+  padding:6px 9px;border-radius:6px;white-space:nowrap}
+nav.top a:hover{background:var(--paper-2);color:var(--ink)}
+
+/* ---------- hero ---------- */
+header.hero{padding:64px 0 34px;position:relative;overflow:hidden}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--line);margin:0 0 18px}
+header.hero h1{font-size:clamp(40px,8vw,82px);margin:0 0 30px}
+header.hero h1 .brk{position:relative;color:var(--stop);display:inline-block;padding-bottom:.24em}
+header.hero h1 .brk::after{content:"";position:absolute;left:0;right:-4px;bottom:0;height:5px;
+  background:repeating-linear-gradient(90deg,var(--stop) 0 10px,transparent 10px 18px)}
+.lede{font-size:clamp(18px,2.4vw,22px);max-width:640px;color:var(--ink-soft);margin:20px 0 0}
+.lede b{color:var(--ink);font-weight:600}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);
+  border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin:40px 0 0}
+.kpi{background:var(--card);padding:18px 16px}
+.kpi + .kpi{border-left:1px solid var(--hair)}
+.kpi .v{font-family:var(--mono);font-weight:600;font-size:clamp(22px,4vw,30px);letter-spacing:-.02em;line-height:1}
+.kpi .l{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.3}
+.kpi.stop .v{color:var(--stop)} .kpi.go .v{color:var(--go)} .kpi.slow .v{color:var(--slow)}
+@media(max-width:640px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi + .kpi{border-left:none}
+  .kpi:nth-child(even){border-left:1px solid var(--hair)}
+  .kpi:nth-child(n+3){border-top:1px solid var(--hair)}
+}
+
+/* ---------- section frame ---------- */
+section{padding:56px 0 12px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.sec-head .mk{font-family:var(--mono);font-size:13px;color:#fff;background:var(--ink);
+  padding:3px 9px;border-radius:5px;letter-spacing:.04em}
+.sec-head h2{font-size:clamp(28px,5vw,44px);margin:0}
+.sec-sub{color:var(--ink-soft);max-width:680px;margin:6px 0 30px}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ---------- LINE / timeline ---------- */
+.line{position:relative;margin-left:8px;padding-left:38px}
+.line::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:6px;border-radius:6px;
+  background:linear-gradient(var(--go) 0 42%,var(--slow) 42% 74%,var(--stop) 74% 100%)}
+.stop{position:relative;margin:0 0 10px;background:var(--card);border:1px solid var(--hair);
+  border-radius:12px;padding:15px 16px 15px 18px;cursor:pointer;transition:border-color .2s,transform .15s}
+.stop:hover{border-color:var(--ink-soft)}
+.stop::before{content:"";position:absolute;left:-36px;top:20px;width:18px;height:18px;border-radius:50%;
+  background:var(--paper);border:4px solid var(--slow);box-shadow:0 0 0 4px var(--paper)}
+.stop.go::before{border-color:var(--go)} .stop.stopc::before{border-color:var(--stop)}
+.stop.done::before{border-color:var(--go)} .stop.future::before{border-color:var(--hair);background:var(--paper)}
+.stop .when{font-family:var(--mono);font-size:12.5px;color:var(--line);letter-spacing:.02em}
+.stop .ttl{font-family:var(--disp);font-weight:700;font-size:18px;margin:2px 0 0;letter-spacing:-.01em}
+.stop .body{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--ink-soft);font-size:15.5px}
+.stop.open .body{max-height:340px;margin-top:9px}
+.stop .tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:4px;
+  margin-top:8px;letter-spacing:.03em}
+.tag.go{background:rgba(31,138,87,.14);color:var(--go)}
+.tag.slow{background:rgba(214,144,34,.16);color:#8f5c07}
+.tag.stopc{background:rgba(194,59,37,.14);color:var(--stop)}
+.tag.future{background:var(--paper-2);color:var(--ink-soft)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;margin:0 0 22px;color:var(--ink-soft)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+/* ---------- money ---------- */
+.track{margin:6px 0 4px}
+.track-bar{position:relative;height:56px;border-radius:10px;overflow:hidden;border:1px solid var(--hair);
+  background:repeating-linear-gradient(90deg,var(--paper-2) 0 2px,transparent 2px 22px)}
+.track-fill{position:absolute;top:0;bottom:0;left:0;width:0;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.track-paid{background:var(--go);z-index:3}
+.track-comm{background:repeating-linear-gradient(135deg,var(--slow) 0 8px,#e0a94a 8px 16px);z-index:2;opacity:.9}
+.track-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.tl{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:12px 13px}
+.tl .v{font-family:var(--mono);font-weight:600;font-size:21px;line-height:1}
+.tl .l{font-size:12.5px;color:var(--ink-soft);margin-top:5px}
+.tl.paid{border-left:4px solid var(--go)} .tl.comm{border-left:4px solid var(--slow)} .tl.none{border-left:4px solid var(--hair)}
+@media(max-width:640px){.track-legend{grid-template-columns:1fr}}
+
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:32px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:20px}
+.panel h3{font-size:19px;margin:0 0 4px}
+.panel .cap{font-size:13px;color:var(--ink-soft);margin:0 0 16px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:180px}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%}
+.bars .bar{width:100%;background:var(--line);border-radius:5px 5px 0 0;height:0;transition:height 1s ease;min-height:2px}
+.bars .b.hot .bar{background:var(--slow)}
+.bars .val{font-family:var(--mono);font-size:12px;font-weight:600}
+.bars .yr{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.fund-row{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:14.5px}
+.fund-row .sw{width:14px;height:14px;border-radius:4px;flex:none}
+.fund-row .fv{margin-left:auto;font-family:var(--mono);font-weight:600}
+.note{font-size:13.5px;color:var(--ink-soft);border-left:3px solid var(--line);padding:4px 0 4px 14px;margin:20px 0 0}
+
+/* ---------- conti / analisi budget impresa ---------- */
+.conti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 22px}
+@media(max-width:700px){.conti-grid{grid-template-columns:repeat(2,1fr)}}
+.conti-card{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:15px 16px}
+.conti-card .cv{font-family:var(--mono);font-weight:600;font-size:21px;letter-spacing:-.02em;line-height:1}
+.conti-card .cl{font-size:12.5px;color:var(--ink-soft);margin-top:7px;line-height:1.3}
+.calc{margin-top:4px}
+.calc .cap{font-size:13.5px;color:var(--ink-soft);margin:0 0 22px}
+.calc-controls{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+@media(max-width:640px){.calc-controls{grid-template-columns:1fr;gap:20px}}
+.ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;margin-bottom:9px;gap:10px}
+.ctrl label b{font-family:var(--mono);font-weight:600;color:var(--line);font-size:15px;white-space:nowrap}
+.ctrl input[type=range]{width:100%;accent-color:var(--line);height:4px;cursor:pointer}
+.ctrl .hint{font-family:var(--mono);font-size:10px;color:var(--ink-soft);display:flex;justify-content:space-between;margin-top:6px}
+.calc-out{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+@media(max-width:640px){.calc-out{grid-template-columns:1fr}}
+.calc-out .o{background:var(--paper-2);border-radius:10px;padding:13px 14px}
+.calc-out .o .ov{font-family:var(--mono);font-weight:600;font-size:23px;line-height:1;color:var(--ink)}
+.calc-out .o.hi{background:rgba(31,138,87,.12)}
+.calc-out .o.hi .ov{color:var(--go)}
+.calc-out .o .ol{font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.3}
+.crew .row{display:flex;align-items:center;gap:12px;margin:11px 0}
+.crew .rl{font-size:12.5px;width:190px;flex:none;color:var(--ink-soft);line-height:1.3}
+.crew .rt{flex:1;height:22px;background:var(--paper-2);border-radius:6px;overflow:hidden}
+.crew .rf{height:100%;border-radius:6px;transition:width .35s ease;display:block}
+.crew .rf.b{background:var(--go)} .crew .rf.r{background:var(--stop)}
+.crew .rv{font-family:var(--mono);font-weight:600;font-size:13px;width:44px;flex:none;text-align:right}
+@media(max-width:520px){.crew .rl{width:120px}}
+.conti-key{font-size:16px;margin:26px 0 0;border-left:3px solid var(--go);padding-left:16px;font-weight:500}
+.conti-key b{font-weight:700}
+
+/* ---------- accountability ---------- */
+.actors{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+@media(max-width:700px){.actors{grid-template-columns:1fr}}
+.actor{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:18px;
+  border-top:5px solid var(--ink)}
+.actor.power{border-top-color:var(--line)}
+.actor h3{font-size:20px;margin:0 0 2px}
+.actor .role{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:.02em}
+.actor .who{margin:12px 0 0;font-size:14.5px}
+.actor .who b{font-weight:600}
+.actor .lever{margin-top:14px;padding-top:14px;border-top:1px dashed var(--hair)}
+.actor .lever .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--line)}
+.actor .did{margin-top:10px}
+.actor .did .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--stop)}
+.actor .did.ok .k{color:var(--go)}
+.actor p{margin:5px 0 0;font-size:14.5px;color:var(--ink-soft)}
+
+.gate{background:var(--ink);color:#dfe6ee;border-radius:14px;padding:20px;margin-top:14px}
+.gate h3{color:#fff;font-size:19px;margin:0 0 6px}
+.gate p{margin:0;font-size:14.5px;color:#b9c6d6}
+.gate .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+@media(max-width:640px){.gate .g2{grid-template-columns:1fr}}
+.gate .g2 b{color:#fff}
+
+/* ---------- command chain ---------- */
+.chain{margin:2px 0 8px}
+.chain-flow{display:flex;align-items:stretch;gap:0}
+.chain-node{flex:1 1 0;min-width:0;background:var(--card);border:1px solid var(--hair);
+  border-top:4px solid var(--line);border-radius:12px;padding:14px 15px}
+.chain-node.imp{border-top-color:var(--slow)}
+.chain-node.com{border-top-color:var(--hair)}
+.chain-node .nlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.chain-node h3{font-size:18px;margin:4px 0 2px}
+.chain-node p{margin:0;font-size:12.5px;color:var(--ink-soft)}
+.chain-link{flex:0 0 104px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px}
+.chain-link .llab{font-family:var(--mono);font-size:10px;color:var(--line);line-height:1.3;text-align:center;margin-bottom:8px}
+.chain-link .lbar{width:100%;height:2px;background:var(--ink);position:relative}
+.chain-link .lbar::after{content:"";position:absolute;right:-1px;top:50%;width:8px;height:8px;
+  border-top:2px solid var(--ink);border-right:2px solid var(--ink);transform:translateY(-50%) rotate(45deg)}
+.chain-branch{display:flex;gap:16px;align-items:center;margin-top:16px}
+.chain-branch .chain-node.com{flex:0 0 240px}
+.chain-branch .bnote{font-size:13.5px;color:var(--ink-soft)}
+.chain-branch .bnote b{color:var(--stop);font-weight:600}
+.chain-key{font-size:15px;margin:18px 0 4px;border-left:3px solid var(--line);padding-left:14px}
+.chain-key b{font-weight:600}
+.detail-lead{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.01em;margin:26px 0 14px}
+@media(max-width:700px){
+  .chain-flow{flex-direction:column}
+  .chain-link{flex:0 0 auto;width:100%;padding:9px 0}
+  .chain-link .llab{margin-bottom:6px}
+  .chain-link .lbar{width:2px;height:24px}
+  .chain-link .lbar::after{right:auto;left:50%;top:auto;bottom:-1px;transform:translateX(-50%) rotate(135deg)}
+  .chain-branch{flex-direction:column;align-items:stretch}
+  .chain-branch .chain-node.com{flex:0 0 auto}
+}
+
+/* ---------- action / prevention lists ---------- */
+.acts{display:grid;gap:12px;margin-top:8px}
+.act{display:grid;grid-template-columns:auto 1fr;gap:16px;background:var(--card);
+  border:1px solid var(--hair);border-radius:12px;padding:16px 18px}
+.act .who{font-family:var(--disp);font-weight:900;font-size:14px;color:#fff;background:var(--line);
+  align-self:start;padding:5px 10px;border-radius:6px;white-space:nowrap}
+.act.urgent .who{background:var(--stop)}
+.act h3{font-size:17px;margin:0 0 4px}
+.act p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+.act .eff{font-family:var(--mono);font-size:12px;color:var(--go);margin-top:8px;display:block}
+
+.prev{counter-reset:p;display:grid;gap:2px;margin-top:8px;
+  border:1px solid var(--hair);border-radius:14px;overflow:hidden;background:var(--hair)}
+.prev .p{background:var(--card);padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:18px}
+.prev .p::before{counter-increment:p;content:counter(p,decimal-leading-zero);
+  font-family:var(--mono);font-weight:600;color:var(--line);font-size:15px}
+.prev h3{font-size:17px;margin:0 0 3px}
+.prev p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+
+/* ---------- sources ---------- */
+.src{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:22px;margin-top:8px}
+.src h3{font-size:16px;margin:22px 0 8px;font-family:var(--mono);font-weight:600;letter-spacing:.02em}
+.src h3:first-child{margin-top:0}
+.src ul{margin:0;padding-left:18px}
+.src li{font-size:14px;color:var(--ink-soft);margin:4px 0}
+.src code{font-family:var(--mono);font-size:12.5px;background:var(--paper-2);padding:1px 5px;border-radius:4px}
+.disclaim{font-size:13px;color:var(--ink-soft);background:var(--paper-2);border-radius:10px;padding:14px 16px;margin-top:16px}
+
+footer{padding:44px 0 60px;color:var(--ink-soft);font-size:13px;border-top:1px solid var(--hair);margin-top:40px}
+footer .mono{font-size:12px}
+
+/* ---------- sticky share bar ---------- */
+.share-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--ink);
+  border-top:1px solid #0b1424;display:flex;align-items:center;gap:12px;
+  padding:9px 16px;box-shadow:0 -3px 16px rgba(19,32,56,.20)}
+.share-bar .lab{font-family:var(--mono);font-size:12.5px;color:#c3cfdd;margin-right:auto;
+  letter-spacing:.02em;white-space:nowrap}
+.share-bar a{display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+  font-family:var(--sans);font-weight:600;font-size:13.5px;color:#fff;
+  padding:8px 14px;border-radius:8px;transition:filter .15s}
+.share-bar a.wa{background:#25D366;color:#07321c}
+.share-bar a.fb{background:#1877F2}
+.share-bar a svg{width:16px;height:16px;display:block;fill:currentColor}
+.share-bar a:hover{filter:brightness(1.07)}
+.share-bar a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:520px){.share-bar{justify-content:center;gap:10px;padding:8px 12px}
+  .share-bar .lab{display:none}.share-bar a{flex:1;justify-content:center}}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <span class="brand"><span class="dot"></span>La linea che non arriva</span>
+  <a href="#passato">Passato</a>
+  <a href="#soldi">I soldi</a>
+  <a href="#conti">I conti</a>
+  <a href="#chi">Chi</a>
+  <a href="#ora">Cosa fare ora</a>
+  <a href="#futuro">Futuro</a>
+  <a href="#fonti">Fonti</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Inchiesta · Metropolitana di superficie di Cagliari · Linea 3</p>
+  <h1>Metro Cagliari:<br>2,5&nbsp;km.<br>Undici anni.<br><span class="brk">E non arriva.</span></h1>
+  <p class="lede">La Linea 3 doveva collegare piazza Repubblica alla stazione di piazza Matteotti in <b>836 giorni</b>. Cinque anni dopo l'apertura del cantiere è pagata al <b>43%</b>, ha <b>una fermata su cinque</b>, e a marzo 2026 un atto le ha concesso <b>altri cinque anni</b>. Non è ferma per mancanza di soldi. È ferma perché nessuno usa fino in fondo le leve che ha in mano. Ecco chi, come e perché — dati alla mano.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">41,4<span style="font-size:.5em"> mln €</span></div><div class="l">Costo totale dell'opera</div></div>
+    <div class="kpi go"><div class="v">43%</div><div class="l">Pagato davvero (dic 2025)</div></div>
+    <div class="kpi slow"><div class="v">1<span style="font-size:.5em">/5</span></div><div class="l">Fermate realizzate (ott 2025)</div></div>
+    <div class="kpi stop"><div class="v">2027<span style="font-size:.5em">+</span></div><div class="l">Fine oggi prevista</div></div>
+  </div>
+</div></header>
+
+<!-- ========== PASSATO ========== -->
+<section id="passato"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">Il passato</span><h2>La linea, fermata per fermata</h2></div>
+  <p class="sec-sub reveal">Ogni tappa è una fermata sulla linea. Il colore è quello dei segnali ferroviari: <b>verde</b> fatto, <b>ambra</b> in corso o in ritardo, <b>rosso</b> bloccato. Tocca una fermata per aprirla.</p>
+  <div class="legend reveal">
+    <span><i style="background:var(--go)"></i>Fatto</span>
+    <span><i style="background:var(--slow)"></i>In ritardo / in corso</span>
+    <span><i style="background:var(--stop)"></i>Bloccato</span>
+    <span><i style="background:var(--hair)"></i>Futuro</span>
+  </div>
+  <div class="line reveal" id="timeline"></div>
+</div></section>
+
+<!-- ========== SOLDI ========== -->
+<section id="soldi"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">I soldi</span><h2>Dove sono finiti i 41 milioni</h2></div>
+  <p class="sec-sub reveal">I fondi ci sono. Il problema non è la cassa: è che tre quarti sono impegnati ma meno della metà è stata liquidata, e un quarto non è nemmeno stato messo sotto contratto. Immagina il binario: quello verde è posato e pagato, quello ambra è appaltato ma non ancora costruito, il resto è ancora terra.</p>
+
+  <div class="track reveal">
+    <div class="track-bar" id="trackbar">
+      <div class="track-fill track-comm" id="fillComm"></div>
+      <div class="track-fill track-paid" id="fillPaid"></div>
+    </div>
+    <div class="track-legend">
+      <div class="tl paid"><div class="v" style="color:var(--go)">17,97 mln</div><div class="l">Pagato — binario posato (43%)</div></div>
+      <div class="tl comm"><div class="v" style="color:#8f5c07">30,99 mln</div><div class="l">Impegnato — sotto contratto (75%)</div></div>
+      <div class="tl none"><div class="v" style="color:var(--ink-soft)">10,41 mln</div><div class="l">Nemmeno appaltato (25%)</div></div>
+    </div>
+    <p class="note reveal">I <b>~10,4 milioni non ancora impegnati</b> sono il capolinea di piazza Matteotti (bloccato dall'acquedotto romano), via Roma e le fermate mancanti. Il pezzo più difficile dell'opera non è "quasi finito": deve ancora partire. È questo che spiega il "cinque anni ancora".</p>
+  </div>
+
+  <div class="two">
+    <div class="panel reveal">
+      <h3>Il ritmo del cantiere</h3>
+      <p class="cap">Pagamenti liquidati per anno (milioni €). Per sette anni quasi nulla; i soldi si muovono solo dal 2022; picco nel 2025, la corsa finale per riaprire la Linea 1.</p>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="panel reveal">
+      <h3>Chi mette i soldi</h3>
+      <p class="cap">Composizione del finanziamento pubblico (41,4 mln). La quota europea a scadenza è stata "messa in salvo": dopo il 2024 il FESR si è congelato e a spendere è rimasto il FSC, senza scadenza stringente.</p>
+      <div id="funds"></div>
+      <p class="note" style="margin-top:18px">Il contratto con il raggruppamento (ATI) vale <b class="num">29,1 mln</b>, firmato il <b class="num">22/05/2018</b>: è l'unico impegno che conta. Poi solo una variante da <b class="num">965 mila €</b> nell'agosto 2023, subito dopo il ritrovamento archeologico.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ========== CONTI ========== -->
+<section id="conti"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">L'analisi</span><h2>I soldi bastano per costruire?</h2></div>
+  <p class="sec-sub reveal">Il contratto con il raggruppamento d'imprese (ATI) vale 29,1 milioni per 2,5 km. Basta a pagare una squadra vera e a finire nei tempi? Facciamo i conti con i prezzi di mercato dell'edilizia — e con ipotesi che puoi cambiare tu.</p>
+
+  <div class="conti-grid reveal">
+    <div class="conti-card"><div class="cv">29,1 mln €</div><div class="cl">Budget al raggruppamento (ATI) — contratto del 22/05/2018, appalto integrato</div></div>
+    <div class="conti-card"><div class="cv">11,6 mln €/km</div><div class="cl">Costo al km: nella norma bassa per una tranvia urbana (senza mezzi)</div></div>
+    <div class="conti-card"><div class="cv">836 giorni</div><div class="cl">Durata contrattuale ≈ 2 anni e 3 mesi</div></div>
+    <div class="conti-card"><div class="cv">~35.000 €/g</div><div class="cl">Produzione al giorno che il contratto dava per scontata</div></div>
+  </div>
+
+  <div class="calc panel reveal">
+    <h3>Quanti operai ci stanno dentro?</h3>
+    <p class="cap">Con i prezzi di mercato dell'edilizia, quanti operai può pagare il contratto per l'intera durata contrattuale. Muovi i cursori: sono le sole due ipotesi che contano davvero.</p>
+    <div class="calc-controls">
+      <div class="ctrl">
+        <label>Quota manodopera sul contratto <b><span id="incV">22</span>%</b></label>
+        <input type="range" id="incR" min="15" max="35" value="22" step="1" aria-label="Quota manodopera sul contratto">
+        <div class="hint"><span>15% · molti impianti/materiali</span><span>35% · molto lavoro manuale</span></div>
+      </div>
+      <div class="ctrl">
+        <label>Costo pieno per operaio <b>€<span id="cstV">45</span>k/anno</b></label>
+        <input type="range" id="cstR" min="35" max="55" value="45" step="1" aria-label="Costo pieno per operaio all'anno">
+        <div class="hint"><span>€35k</span><span>€55k · tabelle edilizia</span></div>
+      </div>
+    </div>
+    <div class="calc-out">
+      <div class="o"><div class="ov" id="oLabor">6,4 mln</div><div class="ol">Budget manodopera</div></div>
+      <div class="o"><div class="ov" id="oYears">142</div><div class="ol">Anni-uomo pagabili</div></div>
+      <div class="o hi"><div class="ov" id="oCrew">62</div><div class="ol">Operai medi per tutta la durata</div></div>
+    </div>
+    <div class="crew">
+      <div class="row"><span class="rl">Operai che il budget può pagare</span><span class="rt"><span class="rf b" id="barBudget" style="width:78%"></span></span><span class="rv" id="lblBudget">~62</span></div>
+      <div class="row"><span class="rl">Operai nei momenti peggiori del cantiere</span><span class="rt"><span class="rf r" id="barReal" style="width:4%"></span></span><span class="rv">~3</span></div>
+    </div>
+  </div>
+
+  <p class="conti-key reveal">Verdetto: i soldi sono <b>congrui con l'opera</b>. Anche con le ipotesi più prudenti — 15% di manodopera, operai pagati al massimo — il budget regge decine di operai per l'intera durata. In nessuno scenario “tre operai” è un problema di cassa: è organizzazione e ritmo. Il 43% pagato dopo quasi cinque anni conferma un cantiere andato a passo d'uomo, non a corto di fondi.</p>
+
+  <div class="disclaim">
+    <b>Come leggere questi numeri.</b> È una stima trasparente costruita su fonti aperte, non il dato ufficiale del contratto — che riporta un preciso “costo della manodopera”, verificabile con l'accesso agli atti (gara 25/2016). Il costo per operaio si basa sulle tabelle ministeriali del costo del lavoro in edilizia (costo pieno: retribuzione, contributi, TFR e oneri). “Tre operai” è la fotografia dei momenti di cantiere descritti da residenti e opposizione, non la media dell'intera opera. Il costo al km è riferito alla sola infrastruttura, senza materiale rotabile.
+  </div>
+</div></section>
+
+<!-- ========== CHI ========== -->
+<section id="chi"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">Chi</span><h2>Chi comanda cosa</h2></div>
+  <p class="sec-sub reveal">Quattro attori, ma non sullo stesso piano. Il comando scorre in catena, in una direzione sola: capirla spiega perché la pressione, da sola, non muove il cantiere.</p>
+
+  <div class="chain reveal">
+    <div class="chain-flow">
+      <div class="chain-node">
+        <span class="nlab">Chi possiede</span><h3>Regione</h3><p>Proprietaria di ARST</p>
+      </div>
+      <div class="chain-link"><span class="llab">possiede · nomina i vertici · può commissariare</span><span class="lbar"></span></div>
+      <div class="chain-node">
+        <span class="nlab">Chi appalta</span><h3>ARST</h3><p>Stazione appaltante e gestore</p>
+      </div>
+      <div class="chain-link"><span class="llab">contratto · penali · risoluzione</span><span class="lbar"></span></div>
+      <div class="chain-node imp">
+        <span class="nlab">Chi costruisce</span><h3>ATI</h3><p>Assoc. temporanea d'imprese: <b>Integra</b> (capogruppo), Salcef, Project Automation, Zanolla</p>
+      </div>
+    </div>
+    <div class="chain-branch">
+      <div class="chain-node com"><span class="nlab">Chi non ha potere</span><h3>Comune</h3><p>Autorizzazioni e pressione</p></div>
+      <div class="bnote"><b>Fuori dalla catena di comando.</b> Preme e vota ordini del giorno, ma non firma i contratti, non applica penali, non avvia né ferma i lavori. Ecco perché la sola pressione politica non basta a sbloccare il cantiere.</div>
+    </div>
+    <p class="chain-key">Il comando va in una direzione sola: <b>Regione → ARST → ATI</b>. Ogni anello dipende da quello prima e può agire solo su quello dopo. Chi grida di più — il Comune — è l'unico <b>fuori</b> dalla catena.</p>
+  </div>
+
+  <h3 class="detail-lead reveal">Nel dettaglio: la leva di ciascuno — e chi la usa</h3>
+  <div class="actors reveal" id="actors"></div>
+  <div class="gate reveal">
+    <h3>I cancelli che non si forzano (ma si accelerano)</h3>
+    <p>Qui nessuno sta cincischiando: sono vincoli di legge. Ma i ritardi mostrano tempo perso evitabile.</p>
+    <div class="g2">
+      <div><b>Soprintendenza</b> — L'acquedotto romano trovato a marzo 2023 in piazza Matteotti (sovrintendente Monica Stocchino) ha bloccato il capolinea, da spostare fuori dalla stazione. Non si ruspa: ma si può finanziare lo scavo e chiudere la variante in fretta.</div>
+      <div><b>ANSFISA</b> — Il collaudo di sicurezza non è saltabile. Ma la Commissione si è insediata solo a fine luglio 2025, mesi dopo le prove già fatte da ARST: si poteva avviare in parallelo molto prima.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ========== ORA ========== -->
+<section id="ora"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">Il presente</span><h2>Cosa fare ora per accelerare</h2></div>
+  <p class="sec-sub reveal">Le leve esistono tutte. Nessuna è stata tirata fino in fondo. Ecco chi dovrebbe fare cosa, adesso, e con quale effetto.</p>
+  <div class="acts reveal" id="acts"></div>
+</div></section>
+
+<!-- ========== FUTURO ========== -->
+<section id="futuro"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">Il futuro</span><h2>Come evitare la prossima incompiuta</h2></div>
+  <p class="sec-sub reveal">Non è sfortuna: è un metodo che si ripete. La prima difesa è semplice — responsabili con un nome, obbligati a rendere conto in pubblico e con il potere di sbloccare. Ecco le regole che avrebbero cambiato questa storia, e che varranno per il prolungamento verso il Poetto e Sestu.</p>
+  <div class="prev reveal" id="prev"></div>
+</div></section>
+
+<!-- ========== FONTI ========== -->
+<section id="fonti"><div class="wrap">
+  <div class="sec-head reveal"><span class="mk">Metodo</span><h2>Fonti e verifica</h2></div>
+  <p class="sec-sub reveal">Ogni numero di questa pagina è tracciabile a un documento pubblico. Ecco dove guardare per rifarlo passo passo.</p>
+  <div class="src reveal">
+    <h3>Dati finanziari</h3>
+    <ul>
+      <li>OpenCoesione — progetto "Metro Cagliari Repubblica–Bonaria", <code>CUP F21E16000140008</code>. Due record sullo stesso CUP: <code>1SA00130103461aPRATT15520152</code> (POR FESR) e <code>1SAMS_TRA_002</code> (PSC/FSC). Dati aggiornati al 28/02/2026; pagamenti fino a dicembre 2025.</li>
+      <li>Impegni, pagamenti e cronologia dei fondi ricavati dai dataset di progetto scaricabili da OpenCoesione (formato CSV/JSON).</li>
+    </ul>
+    <h3>Appalto e responsabili</h3>
+    <ul>
+      <li>ARST S.p.A. — Gara <code>n. 25/2016</code>, <code>CIG 66547200AC</code>. RUP indicato negli atti: ing. Ernesto Porcu (Conferenza dei Servizi decisoria, 2018). Amministrazione Trasparente ARST per bando, contratto e collaudo.</li>
+      <li>Composizione dell'ATI (associazione temporanea di imprese): <b>Consorzio Integra</b> capogruppo mandataria; mandanti <b>Salcef</b> (armamento ed elettrificazione), <b>Project Automation</b> (segnalamento e impianti) e <b>Zanolla</b>; opere civili eseguite dalla consorziata di Integra <b>CMSA</b>. Scope e pacchetti di lavoro dalla scheda progetto di <a href="https://www.consorziointegra.it/it/16909/metropolitana-leggera-di-cagliari" target="_blank" rel="noopener">Consorzio Integra</a> e dalle pagine societarie di Salcef e CMSA.</li>
+      <li>Vertici ARST e revoca/nomina dell'Amministratore Unico: D.G.R. n. 35/77 del 04/07/2025; delibere della Giunta regionale.</li>
+    </ul>
+    <h3>Cronologia e criticità</h3>
+    <ul>
+      <li>Regione Autonoma della Sardegna — comunicati del 26/03/2021 (avvio), 23/10/2025 (riapertura Linea 1), 26/03/2026 (verifica ambientale ex post, valore ~41,3 mln, termine 5 anni).</li>
+      <li>ANSA e L'Unione Sarda — ritrovamento dell'acquedotto romano (marzo 2023).</li>
+      <li>Rassegna stampa: CagliariToday, Cagliaripad, Sardegna Notizie 24, La Nuova Sardegna, YouTG, Telesardegna, Casteddu Online.</li>
+      <li>Wikipedia "Rete tranviaria di Cagliari" per la cronologia storica; Transparency International Italia (Integrity Pact) per il monitoraggio civico dell'appalto.</li>
+    </ul>
+    <div class="disclaim">
+      <b>Nota di trasparenza.</b> Alcune letture sono inferenze, segnalate come tali: l'impegno da 965 mila € dell'agosto 2023 è <i>compatibile</i> con la variante per l'archeologia (per data e importo), ma il dato non ne riporta la causale. Il RUP ing. Ernesto Porcu è documentato per la procedura al 2018: in un'opera lunga il RUP può cambiare, e il nominativo per la fase esecutiva va confermato sul contratto. I due record OpenCoesione riguardano lo stesso CUP e non vanno sommati; la cifra pagata di riferimento è quella del record FSC, più aggiornato.
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p class="mono">La linea che non arriva — base per un'inchiesta pubblica sulla Linea 3 della metropolitana di superficie di Cagliari.</p>
+  <p>Documento di lavoro costruito su fonti aperte. I dati riflettono lo stato al febbraio 2026 (pagamenti a dicembre 2025). Verificare sempre sugli atti originali prima della pubblicazione. Le opinioni e le proposte della sezione "Cosa fare ora" e "Futuro" sono ricostruzioni degli strumenti previsti dall'ordinamento, non accuse personali: i nomi indicano ruoli e responsabilità istituzionali, non colpe individuali provate.</p>
+</div></footer>
+
+<div class="share-bar">
+  <span class="lab">Condividi l'inchiesta</span>
+  <a id="shWa" class="wa" target="_blank" rel="noopener" href="#" aria-label="Condividi su WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</a>
+  <a id="shFb" class="fb" target="_blank" rel="noopener" href="#" aria-label="Condividi su Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const TIMELINE=[
+ {when:"1996 → 2006", ttl:"L'idea, e i primi binari", state:"done", tag:"Contesto",
+  body:"I primi studi per una metro di superficie a Cagliari risalgono al 1996; i primi lavori sulla Linea 1 al 2006. La Linea 3 nasce come completamento verso il porto e la stazione."},
+ {when:"16/04/2016", ttl:"Bando di gara — Linea 3", state:"done", tag:"Fatto",
+  body:"ARST pubblica la gara n. 25/2016 (CIG 66547200AC, CUP F21E16000140008) per 2,5 km, cinque fermate e il capolinea alla stazione RFI. Appalto integrato: progettazione esecutiva, forniture e lavori."},
+ {when:"22/05/2018", ttl:"Contratto con il raggruppamento (ATI) — 29,1 mln €", state:"done", tag:"Fatto",
+  body:"Si firma l'impegno principale: 29,1 milioni verso l'ATI. RUP indicato negli atti: ing. Ernesto Porcu. È l'unico impegno che conta; tutto il resto sono aggiunte marginali."},
+ {when:"Ottobre 2019", ttl:"Doveva partire qui", state:"stopc", tag:"Salta",
+  body:"Da programma i lavori dovevano cominciare nell'ottobre 2019 e finire nel 2021. Non partono."},
+ {when:"2020", ttl:"Rinvio: pandemia", state:"slow", tag:"In ritardo",
+  body:"I lavori slittano, in parte per il COVID. La progettazione esecutiva si chiude a novembre 2020. Annunciata una partenza per il 16 gennaio 2021."},
+ {when:"26/03/2021", ttl:"Via ai lavori — obiettivo 836 giorni", state:"slow", tag:"In ritardo",
+  body:"Parte il cantiere (giunta Solinas, assessore Todde, sindaco Truzzu). Obiettivo dichiarato: 2,5 km in 836 giorni, fine 2024. Nessuna delle due cose accadrà."},
+ {when:"Marzo 2023", ttl:"L'acquedotto romano", state:"stopc", tag:"Bloccato",
+  body:"Scavando per il capolinea in piazza Matteotti, a un metro di profondità emergono una fontana monumentale e un acquedotto di epoca romana. La Soprintendenza blocca il cantiere del capolinea, che va spostato fuori dalla stazione. Anni dopo è ancora fermo."},
+ {when:"30/08/2023", ttl:"Variante da 965 mila €", state:"slow", tag:"In ritardo",
+  body:"Un nuovo impegno da 965.000 €, per data e importo compatibile con la variante per l'area archeologica. È l'unica aggiunta rilevante al contratto del 2018."},
+ {when:"Estate 2025", ttl:"Caos ai vertici di ARST", state:"stopc", tag:"Bloccato",
+  body:"La Giunta revoca l'Amministratore Unico Roberto Neroni (D.G.R. 35/77 del 04/07/2025) e nomina Giovanni Mocci. Nel passaggio si crea un vuoto operativo: stipendi non pagati, sciopero. Proprio l'ente che dovrebbe far rispettare gli impegni al raggruppamento era alle prese con la propria crisi interna."},
+ {when:"27/10/2025", ttl:"Riapre la Linea 1", state:"done", tag:"Fatto (parziale)",
+  body:"Dopo più di mille giorni di lavori e il nulla osta ANSFISA, torna in servizio la Linea 1 San Gottardo–Repubblica. Un pezzo di servizio restituito, mentre il resto resta impantanato."},
+ {when:"Ottobre 2025", ttl:"Una fermata su cinque", state:"slow", tag:"In corso",
+  body:"Della Linea 3 risulta realizzata una sola fermata sulle cinque previste. I lavori proseguono a rilento su viale Diaz e viale Bonaria."},
+ {when:"16/03/2026", ttl:"Al via i lavori in via Roma", state:"slow", tag:"In corso",
+  body:"Partono i lavori nel tratto più delicato, via Roma, con la demolizione della corsia preferenziale dei bus usata da anni."},
+ {when:"26/03/2026", ttl:"Ancora cinque anni", state:"stopc", tag:"Orologio azzerato",
+  body:"La Giunta chiude la verifica ambientale ex post (valore ~41,3 mln) e fissa un termine di CINQUE anni per il completamento. Un'opera partita nel 2021 come '836 giorni' si concede un orizzonte fino al 2031."},
+ {when:"30/06/2027", ttl:"Fine 'prevista' (record FSC)", state:"future", tag:"Futuro",
+  body:"È la data di fine dichiarata sui fondi FSC. Il collaudo finale è ancora tutto da fare. Se non nascono altri problemi."}
+];
+
+const YEARS=[
+ {yr:"'14–20", v:0.56, hot:false},
+ {yr:"2021", v:0.74, hot:false},
+ {yr:"2022", v:3.12, hot:false},
+ {yr:"2023", v:3.22, hot:false},
+ {yr:"2024", v:3.42, hot:false},
+ {yr:"2025", v:6.90, hot:true}
+];
+
+const FUNDS=[
+ {l:"Regione Sardegna", v:"21,5 mln", c:"#1957C7", w:52},
+ {l:"Fondo Sviluppo e Coesione (FSC)", v:"11,4 mln", c:"#1F8A57", w:28},
+ {l:"Altro pubblico (era POR FESR)", v:"8,5 mln", c:"#D69022", w:20}
+];
+
+const ACTORS=[
+ {cls:"power", name:"ARST", role:"Stazione appaltante e gestore",
+  who:"AU <b>Giovanni Mocci</b> (dopo Roberto Neroni) · RUP <b>ing. Ernesto Porcu</b> · dir. centrale <b>Carlo Poledrini</b>",
+  lever:"Penali di ritardo, messa in mora, risoluzione in danno, ordini di accelerazione. È l'unico soggetto con potere contrattuale sul raggruppamento (ATI).",
+  didOk:false, did:"Nei dati non risultano penali. Il cantiere interrotto è stato gestito con un verbale di ripartenza, non con una sanzione. E dopo un voto unanime del Consiglio comunale, ARST ha risposto \u201cnon rilasciamo dichiarazioni\u201d."},
+ {cls:"power", name:"Regione", role:"Proprietaria di ARST · vigilanza",
+  who:"Presidente <b>Alessandra Todde</b> · assessora ai Trasporti <b>Barbara Manca</b>",
+  lever:"Nomina e revoca i vertici ARST. Può nominare un commissario straordinario per l'opera, con poteri derogatori.",
+  didOk:false, did:"Ha rivoltato i vertici ARST creando un vuoto operativo nel momento peggiore. Non ha commissariato l'opera."},
+ {cls:"", name:"L'ATI — raggruppamento d'imprese", role:"Chi materialmente costruisce",
+  who:"Non un'impresa ma un'<b>associazione temporanea</b>. Chi fa cosa:<br>• <b>Consorzio Integra</b> — capogruppo mandataria, coordina l'ATI e risponde verso ARST; esegue le <b>opere civili</b> tramite la consorziata <b>CMSA</b><br>• <b>Salcef</b> — <b>armamento</b> (binari) ed <b>elettrificazione</b> (linea di contatto e sottostazioni)<br>• <b>Project Automation</b> — <b>segnalamento</b>, sicurezza, telecomunicazioni e semaforizzazione<br>• <b>Zanolla</b> — impianti",
+  lever:"Mettere uomini e mezzi in cantiere e rispettare il cronoprogramma. Ogni impresa risponde del proprio pacchetto; la capogruppo Integra coordina.",
+  didOk:false, did:"Sotto-organico evidente in cantiere. In un caso il cantiere è stato interrotto in modo \u201cingiustificato\u201d, come da verbale ARST."},
+ {cls:"", name:"Comune di Cagliari", role:"Viabilità e autorizzazioni",
+  who:"Sindaco <b>Massimo Zedda</b> · assessore alla Mobilità <b>Yuri Marcialis</b>",
+  lever:"Autorizzazioni comunali, ordinanze (es. lavori notturni), pressione politica. Nessun potere sui lavori.",
+  didOk:true, did:"Vota ordini del giorno all'unanimità e preme su ARST. Ma sull'appalto resta, per sua stessa denuncia, uno \u201cspettatore passivo\u201d."}
+];
+
+const ACTS=[
+ {who:"ARST", urgent:true, h:"Aprire la partita contrattuale con il raggruppamento",
+  p:"Mettere in mora l'ATI, contabilizzare e applicare le penali maturate e, se l'inadempimento persiste, valutare la risoluzione. Pubblicare un cronoprogramma vincolante con i SAL aperti.",
+  eff:"→ Toglie al raggruppamento la convenienza di lavorare a rilento"},
+ {who:"Regione", urgent:true, h:"Commissariare, se ARST non stringe",
+  p:"Nominare un commissario per l'opera con poteri derogatori e catena di comando corta. E garantire continuità gestionale ai vertici ARST: basta vuoti operativi.",
+  eff:"→ Una sola testa che risponde, con potere di sbloccare"},
+ {who:"ATI", urgent:false, h:"Cantiere a organico pieno",
+  p:"Portare squadre vere su viale Bonaria e via Roma e chiudere la variante del capolinea. Il ritmo del 2025 va tenuto, non era un'eccezione.",
+  eff:"→ Recupera i 13 mln impegnati ma non ancora spesi"},
+ {who:"Soprint. + ARST", urgent:false, h:"Sbloccare Matteotti",
+  p:"Definire e finanziare la soluzione per l'acquedotto: capolinea in piazza, valorizzazione dei reperti. È il nodo che tiene fermo un quarto dell'opera.",
+  eff:"→ Rende appaltabili i ~10 mln non ancora impegnati"},
+ {who:"ANSFISA + ARST", urgent:false, h:"Collaudare a spezzoni, in parallelo",
+  p:"Avviare i collaudi tratta per tratta appena una tratta è pronta, senza attendere il completamento totale. È già successo per la Linea 1: si replichi.",
+  eff:"→ Servizio ai cittadini prima, non solo alla fine"},
+ {who:"Comune", urgent:false, h:"Usare le autorizzazioni come leva",
+  p:"Condizionare i permessi a un cronoprogramma verificabile e pretendere trasparenza. Portare il tema alla Città Metropolitana, che è il programmatore dei fondi.",
+  eff:"→ Trasforma la pressione in condizioni concrete"}
+];
+
+const PREV=[
+ {h:"Un responsabile con nome — e con il potere di intervenire", p:"Ogni opera deve avere una figura chiaramente responsabile: nome pubblico, competenze tecniche e potere reale di agire quando il cantiere si incaglia, non solo di \u201csegnalare\u201d. Qualcuno che risponde dei tempi e ha l'autorità per sbloccarli."},
+ {h:"Stato di avanzamento pubblico e obbligatorio", p:"Un cruscotto online accessibile a chiunque, aggiornato a ogni SAL: quanto impegnato, quanto pagato, quanto costruito, con i ritardi e le loro cause. Reso obbligatorio per contratto. La trasparenza come dovere, non come cortesia — un ente che risponde \u201cnon rilasciamo dichiarazioni\u201d è parte del problema."},
+ {h:"Ogni ritardo ha un titolare — niente scarico di responsabilità", p:"Il cronoprogramma deve dire chi fa cosa entro quando. Se una tappa slitta si vede subito di chi era il compito: con ogni passaggio assegnato a un responsabile e a una scadenza pubblica, nessuno può più dire \u201cè colpa di un altro ente\u201d."},
+ {h:"Archeologia preventiva a monte", p:"In una città stratificata come Cagliari, le indagini geoarcheologiche vanno fatte prima di appaltare, non \u201ca ruspa in corsa\u201d. Il capolinea sull'acquedotto era prevedibile."},
+ {h:"Contratti che scoraggino il sotto-organico", p:"Obblighi di risorse minime in cantiere e penali per fermo ingiustificato. Il \u201ctre operai per un'opera immensa\u201d deve costare all'appaltatore."},
+ {h:"Collaudo in parallelo", p:"Coinvolgere ANSFISA dall'inizio e collaudare per tratte. Aspettare la fine per iniziare i test aggiunge mesi evitabili."},
+ {h:"Non 'mettere in salvo' i fondi togliendo la pressione", p:"La scadenza dei fondi UE è ciò che fa correre. Spostare tutto sul FSC senza vincoli temporali toglie l'unico vincolo esterno che imponeva ritmo: vanno mantenuti vincoli equivalenti."},
+ {h:"Appalti per tratte indipendenti", p:"Così un blocco locale — come il capolinea archeologico — non congela l'intera linea. Il resto può avanzare e aprire prima."}
+];
+
+/* ---------------- RENDER ---------------- */
+function el(t,c,h){const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+
+// timeline
+const tl=document.getElementById('timeline');
+TIMELINE.forEach(s=>{
+  const cls={done:"done",go:"done",slow:"slow",stopc:"stopc",future:"future"}[s.state]||"slow";
+  const tagcls={done:"go",go:"go",slow:"slow",stopc:"stopc",future:"future"}[s.state]||"slow";
+  const node=el('div','stop '+cls);
+  node.innerHTML=`<div class="when">${s.when}</div><div class="ttl">${s.ttl}</div>
+    <div class="body">${s.body}<br><span class="tag ${tagcls}">${s.tag}</span></div>`;
+  node.addEventListener('click',()=>node.classList.toggle('open'));
+  tl.appendChild(node);
+});
+
+// money track
+function paintTrack(){
+  document.getElementById('fillPaid').style.width='43.4%';
+  document.getElementById('fillComm').style.width='74.9%';
+}
+
+// year bars
+const barsEl=document.getElementById('bars');
+const maxV=Math.max(...YEARS.map(y=>y.v));
+YEARS.forEach(y=>{
+  const b=el('div','b'+(y.hot?' hot':''));
+  b.innerHTML=`<div class="val">${y.v.toFixed(2)}</div><div class="bar" data-h="${(y.v/maxV*100).toFixed(1)}"></div><div class="yr">${y.yr}</div>`;
+  barsEl.appendChild(b);
+});
+function paintBars(){barsEl.querySelectorAll('.bar').forEach(b=>{b.style.height=b.dataset.h+'%';});}
+
+// funds
+const fundsEl=document.getElementById('funds');
+FUNDS.forEach(f=>{
+  fundsEl.appendChild(el('div','fund-row',
+    `<span class="sw" style="background:${f.c}"></span><span>${f.l}</span><span class="fv">${f.v}</span>`));
+});
+
+// actors
+const actEl=document.getElementById('actors');
+ACTORS.forEach(a=>{
+  const n=el('div','actor '+a.cls);
+  n.innerHTML=`<h3>${a.name}</h3><div class="role">${a.role}</div>
+    <div class="who">${a.who}</div>
+    <div class="lever"><div class="k">Leva che ha</div><p>${a.lever}</p></div>
+    <div class="did ${a.didOk?'ok':''}"><div class="k">${a.didOk?'Cosa fa':'Cosa non fa'}</div><p>${a.did}</p></div>`;
+  actEl.appendChild(n);
+});
+
+// action cards
+const actsEl=document.getElementById('acts');
+ACTS.forEach(a=>{
+  const n=el('div','act'+(a.urgent?' urgent':''));
+  n.innerHTML=`<div class="who">${a.who}</div><div><h3>${a.h}</h3><p>${a.p}</p><span class="eff">${a.eff}</span></div>`;
+  actsEl.appendChild(n);
+});
+
+// prevention
+const prevEl=document.getElementById('prev');
+PREV.forEach(p=>{
+  prevEl.appendChild(el('div','p',`<div><h3>${p.h}</h3><p>${p.p}</p></div>`));
+});
+
+/* ---------------- REVEAL + trigger charts ---------------- */
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      if(e.target.id==='trackbar') paintTrack();
+      if(e.target.id==='bars') paintBars();
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.18});
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+io.observe(document.getElementById('trackbar'));
+io.observe(document.getElementById('bars'));
+
+// reduced motion: paint immediately
+if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){paintTrack();paintBars();}
+
+/* ---------------- budget calculator ---------------- */
+(function(){
+  const CONTR=29.1;                     // mln € contratto ATI
+  const YEARS=836/365;                  // durata contrattuale in anni (~2,29)
+  const MAX=80;                         // scala barra
+  const incR=document.getElementById('incR'), cstR=document.getElementById('cstR');
+  if(!incR||!cstR) return;
+  const incV=document.getElementById('incV'), cstV=document.getElementById('cstV');
+  const oLabor=document.getElementById('oLabor'), oYears=document.getElementById('oYears'), oCrew=document.getElementById('oCrew');
+  const barBudget=document.getElementById('barBudget'), lblBudget=document.getElementById('lblBudget');
+  const it=n=>n.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});
+  function calc(){
+    const inc=+incR.value, cst=+cstR.value;
+    incV.textContent=inc; cstV.textContent=cst;
+    const labor=CONTR*inc/100;          // mln €
+    const workerYears=labor*1000/cst;   // (migliaia €) / (k€ per anno) = anni-uomo
+    const crew=workerYears/YEARS;
+    oLabor.textContent=it(labor)+' mln';
+    oYears.textContent=Math.round(workerYears);
+    oCrew.textContent=Math.round(crew);
+    lblBudget.textContent='~'+Math.round(crew);
+    barBudget.style.width=Math.min(100,crew/MAX*100).toFixed(1)+'%';
+  }
+  incR.addEventListener('input',calc);
+  cstR.addEventListener('input',calc);
+  calc();
+})();
+
+/* ---------------- share buttons ---------------- */
+(function(){
+  const url=encodeURIComponent(window.location.href);
+  const txt=encodeURIComponent("La linea che non arriva \u2014 inchiesta sulla metro di superficie di Cagliari");
+  const wa=document.getElementById('shWa'), fb=document.getElementById('shFb');
+  if(wa) wa.href="https://wa.me/?text="+txt+"%20"+url;
+  if(fb) fb.href="https://www.facebook.com/sharer/sharer.php?u="+url;
+})();
+</script>
+</body>
+</html>
